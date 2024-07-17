@@ -1,10 +1,9 @@
 import middy from "@middy/core";
-import { errorHandler } from "../util/errorHandler";
-import { bodyValidator } from "../util/bodyValidator";
-import { ProjectRequestSchema } from "../../types/project";
-import { addProject, getProjectByName } from "../../data/project";
-import { ProjectRequest } from "../../types/project";
 import { APIGatewayProxyEvent, APIGatewayProxyHandler } from "aws-lambda";
+import { addProject, getProjectByName } from "../../data/project";
+import { ProjectRequest, ProjectRequestSchema } from "../../types/project";
+import { bodyValidator } from "../util/bodyValidator";
+import { errorHandler } from "../util/errorHandler";
 
 export const handler: APIGatewayProxyHandler = middy(
 	async (event: APIGatewayProxyEvent) => {

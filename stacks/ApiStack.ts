@@ -1,9 +1,8 @@
-import { StackContext, Api, Table, Script } from "sst/constructs";
-import { State, StateMachine } from "aws-cdk-lib/aws-stepfunctions";
 import * as sfn from "aws-cdk-lib/aws-stepfunctions";
+import { StateMachine } from "aws-cdk-lib/aws-stepfunctions";
 import * as tasks from "aws-cdk-lib/aws-stepfunctions-tasks";
-import { Function } from "sst/constructs";
 import { Duration } from "aws-cdk-lib/core";
+import { Api, Function, Script, StackContext, Table } from "sst/constructs";
 export function API({ stack }: StackContext) {
 	const pmsTable = new Table(stack, "pmsTable", {
 		fields: {
@@ -294,9 +293,19 @@ export function API({ stack }: StackContext) {
 			"POST /project":
 				"packages/functions/api/project/project-post.handler",
 			"GET /project/{id}":
-				"packages/functions/api/project/project-get.handler",
+				"packages/functions/api/project/project-getById.handler",
 			"GET /project":
 				"packages/functions/api/project/project-name.handler",
+			"Get /projects":
+				"packages/functions/api/project/project-getList.handler",
+			"Get /projectWorkFlow/{id}":
+				"packages/functions/api/project/project-getWorkflow.handler",
+			"Get /projectListUser":
+				"packages/functions/api/project/project-Listuser.handler",
+			"PUT /projectUpdate/{id}":
+				"packages/functions/api/project/project-update.handler",
+			"DELETE /projectDelete/{id}":
+				"packages/functions/api/project/project-delete.handler",
 			"POST /workflow": {
 				function: {
 					handler:
