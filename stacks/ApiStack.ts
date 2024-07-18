@@ -300,50 +300,11 @@ export function API({ stack }: StackContext) {
 				"packages/functions/api/project/project-getList.handler",
 			"Get /projectWorkFlow/{id}":
 				"packages/functions/api/project/project-getWorkflow.handler",
-			"Get /projectListUser":
-				"packages/functions/api/project/project-Listuser.handler",
 			"PUT /projectUpdate/{id}":
 				"packages/functions/api/project/project-update.handler",
 			"DELETE /projectDelete/{id}":
 				"packages/functions/api/project/project-delete.handler",
-			"POST /workflow": {
-				function: {
-					handler:
-						"packages/functions/api/workflow/addWorkflowToProject.handler",
-					permissions: ["states:DescribeStateMachine"],
-				},
-			},
-			"GET /template": {
-				function: {
-					handler:
-						"packages/functions/api/workflow/getTemplates.handler",
-					permissions: ["states:DescribeStateMachine"],
-				},
-			},
-			"DELETE /template/{id}":
-				"packages/functions/api/workflow/deleteTemplate.handler",
-
-			"POST /usecase": {
-				function: {
-					handler:
-						"packages/functions/api/usecase/addusecase.handler",
-					permissions: [
-						"states:StartExecution",
-						"states:DescribeStateMachine",
-					],
-				},
-			},
-			"GET /usecase/{id}":
-				"packages/functions/api/usecase/getusecase.handler",
-			"POST /resource":
-				"packages/functions/api/resource/addResource.handler",
-			"PUT /task/{id}/complete": {
-				function: {
-					handler: "packages/functions/api/task/completeTask.handler",
-					permissions: ["states:SendTaskSuccess"],
-				},
-			},
-			"PUT /task": "packages/functions/api/task/getTasks.handler",
+			
 		},
 	});
 

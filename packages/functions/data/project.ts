@@ -1,4 +1,3 @@
-import crypto from "crypto";
 import { Entity } from "electrodb";
 import { Table } from "sst/node/table";
 import { ProjectRequest, ProjectResponse, ProjectUpdateRequest } from "../types/project";
