@@ -1,10 +1,7 @@
-import { Table } from "sst/node/table";
 import { Entity } from "electrodb";
+import { Table } from "sst/node/table";
+import { ProjectRequest, ProjectResponse, ProjectUpdateRequest } from "../types/project";
 import { client } from "./dynamo";
-import crypto from "crypto";
-import { ProjectRequest, ProjectResponse } from "../types/project";
-import { addTeam, getTeam, Team } from "./team";
-import { RoleUsersMap } from "../types/team";
 import { Usecases } from "./usecase";
 
 export const Project = new Entity(
@@ -208,3 +205,66 @@ export const getProjectByName = async (
 		createdAt: item.createdAt,
 	})) as ProjectResponse[];
 };
+
+export const listProjects = async (): Promise<ProjectResponse[]> => {
+    try {
+        const res = await Project.scan.go();
+        return res.data.map((item: any) => ({
+            projectId: item.projectId,
+            name: item.name,
+            description: item.description,
+            status: item.status,
+            startDate: item.startDate,
+            endDate: item.endDate,
+            createdAt: item.createdAt,
+        })) as ProjectResponse[];
+    } catch (err) {
+        console.log(JSON.stringify(err.message));
+        throw err;
+    }
+};
+export const getProjectById = async (projectId: string): Promise<ProjectResponse | null> => {
+    try {
+        const res = await Project.get({ projectId }).go();
+
+        if (!res.data) {
+            return null;
+        }
+
+        return {
+            projectId: res.data.projectId,
+            name: res.data.name,
+            description: res.data.description,
+            status: res.data.status,
+            startDate: res.data.startDate,
+            endDate: res.data.endDate,
+            createdAt: res.data.createdAt,
+        };
+    } catch (err) {
+        console.error(JSON.stringify(err));
+        throw err;
+    }
+};
+
+export const updateProject = async (projectId: string, updateData: ProjectUpdateRequest): Promise<ProjectResponse | null> => {
+    try {
+        const res = await Project.update({ projectId })
+            .set(updateData)
+            .go({ response: 'all_new' });
+        return res.data as ProjectResponse;
+    } catch (err) {
+        console.error(JSON.stringify(err));
+        throw err;
+    }
+};
+
+export const deleteProject = async (projectId: string): Promise<boolean> => {
+    try {
+        await Project.delete({ projectId }).go();
+        return true;
+    } catch (err) {
+        console.error(JSON.stringify(err));
+        throw err;
+    }
+};
+

@@ -13,6 +13,7 @@
 		"@aws-sdk/s3-request-presigner": "^3.616.0",
 		"@middy/core": "^4.7.0",
 		"@middy/error-logger": "^4.7.0",
+		"crypto": "^1.0.1",
 		"electrodb": "^2.14.1",
 		"zod": "^3.22.4"
 	},

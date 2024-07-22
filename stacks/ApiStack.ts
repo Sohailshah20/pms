@@ -1,12 +1,9 @@
-import { StackContext, Api, Table, Script } from "sst/constructs";
-import { StateMachine } from "aws-cdk-lib/aws-stepfunctions";
-import * as sfn from "aws-cdk-lib/aws-stepfunctions";
-import * as tasks from "aws-cdk-lib/aws-stepfunctions-tasks";
-import { Function } from "sst/constructs";
-import { Bucket } from "sst/constructs";
-import { Duration } from "aws-cdk-lib/core";
 import * as iam from "aws-cdk-lib/aws-iam";
-import { Handler } from "aws-cdk-lib/aws-lambda";
+import * as sfn from "aws-cdk-lib/aws-stepfunctions";
+import { StateMachine } from "aws-cdk-lib/aws-stepfunctions";
+import * as tasks from "aws-cdk-lib/aws-stepfunctions-tasks";
+import { Duration } from "aws-cdk-lib/core";
+import { Api, Bucket, Function, Script, StackContext, Table } from "sst/constructs";
 
 export function API({ stack }: StackContext) {
 	const pmsTable = new Table(stack, "pmsTable", {
@@ -314,71 +311,18 @@ export function API({ stack }: StackContext) {
 			"GET /project/{id}/team":
 				"packages/functions/api/project/project.getProjectTeam",
 			"GET /project/{id}":
-				"packages/functions/api/project/project.getProjectById",
-			"GET /project/{id}/workflow":
-				"packages/functions/api/project/project.getProjectWorkflows",
+				"packages/functions/api/project/project-getById.handler",
 			"GET /project":
-				"packages/functions/api/project/project.getAllProjects",
-			"PUT /team/{id}":
-				"packages/functions/api/project/project.updateProjectTeam",
-			"GET /workflow/{id}":
-				"packages/functions/api/workflow/workflow.getWorkflowById",
-			"POST /workflow": {
-				function: {
-					handler:
-						"packages/functions/api/workflow/workflow.addTemplate",
-					permissions: ["states:DescribeStateMachine"],
-				},
-			},
-			"GET /template": {
-				function: {
-					handler: "packages/functions/api/workflow/template.getAll",
-				},
-			},
-			"DELETE /template/{id}":
-				"packages/functions/api/workflow/template.delTemplate",
-
-			"POST /usecase": {
-				function: {
-					handler:
-						"packages/functions/api/usecase/usecase.addNewUsecase",
-					permissions: [
-						"states:StartExecution",
-						"states:DescribeStateMachine",
-					],
-				},
-			},
-			"GET /usecase/{id}":
-				"packages/functions/api/usecase/usecase.getUsecaseById",
-			"GET /usecase/{id}/task":
-				"packages/functions/api/task/task.getTasks",
-			"POST /resource":
-				"packages/functions/api/resource/addResource.handler",
-			"PUT /task/{id}/complete": {
-				function: {
-					handler: "packages/functions/api/task/task.completeTask",
-					permissions: ["states:SendTaskSuccess"],
-				},
-			},
-			"GET /task/status/complete": {
-				function: {
-					handler:
-						"packages/functions/api/user/getTaskbySatus.handler",
-					// permissions: ["states:SendTaskSuccess"],
-				},
-			},
-			// "GET /user": "packages/functions/api/user/getAlluser.handler",
-			"GET /user": "packages/functions/api/user/user.getAll",
-			"PUT /user/{id}": "packages/functions/api/user/user.update",
-			// "DELETE /user/{id}": "packages/functions/api/user/user.handler",
-			"POST /user": "packages/functions/api/user/user.post",
-			"GET /uploadUrl": {
-				function: {
-					handler:
-						"packages/functions/api/media/getPreSignedS3url.handler",
-					bind: [pmsBucket],
-				},
-			},
+				"packages/functions/api/project/project-name.handler",
+			"Get /projects":
+				"packages/functions/api/project/project-getList.handler",
+			"Get /projectWorkFlow/{id}":
+				"packages/functions/api/project/project-getWorkflow.handler",
+			"PUT /projectUpdate/{id}":
+				"packages/functions/api/project/project-update.handler",
+			"DELETE /projectDelete/{id}":
+				"packages/functions/api/project/project-delete.handler",
+			
 		},
 	});
 

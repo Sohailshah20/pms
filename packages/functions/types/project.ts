@@ -27,3 +27,11 @@ export interface ProjectResponse {
 	endDate?: string | undefined;
 	createdAt: string;
 }
+
+export interface ProjectUpdateRequest {
+    name?: string;
+    description?: string;
+    status?: string;
+    startDate?: string;
+    endDate?: string;
+}
