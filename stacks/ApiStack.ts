@@ -1,8 +1,10 @@
+import * as iam from "aws-cdk-lib/aws-iam";
 import * as sfn from "aws-cdk-lib/aws-stepfunctions";
 import { StateMachine } from "aws-cdk-lib/aws-stepfunctions";
 import * as tasks from "aws-cdk-lib/aws-stepfunctions-tasks";
 import { Duration } from "aws-cdk-lib/core";
-import { Api, Function, Script, StackContext, Table } from "sst/constructs";
+import { Api, Bucket, Function, Script, StackContext, Table } from "sst/constructs";
+
 export function API({ stack }: StackContext) {
 	const pmsTable = new Table(stack, "pmsTable", {
 		fields: {
@@ -12,16 +14,40 @@ export function API({ stack }: StackContext) {
 			gsi1sk: "string",
 			gsi2pk: "string",
 			gsi2sk: "string",
+			gsi3pk: "string",
+			gsi3sk: "string",
 		},
 		primaryIndex: { partitionKey: "pk", sortKey: "sk" },
 		globalIndexes: {
 			gsi1: { partitionKey: "gsi1pk", sortKey: "gsi1sk" },
 			gsi2: { partitionKey: "gsi2pk", sortKey: "gsi2sk" },
+			gsi3: { partitionKey: "gsi3pk", sortKey: "gsi3sk" },
 		},
 		timeToLiveAttribute: "expiresAt",
 	});
 
 	const tables = [pmsTable];
+
+	const pmsBucket = new Bucket(stack, "pmsBucket", {
+		cors: [
+			{
+				allowedOrigins: ["*"],
+				allowedHeaders: ["*"],
+				allowedMethods: ["GET", "PUT", "POST", "DELETE", "HEAD"],
+			},
+		],
+	});
+
+	// Create a policy for GetObject
+	const getObjectPolicy = new iam.PolicyStatement({
+		actions: ["s3:GetObject"],
+		effect: iam.Effect.ALLOW,
+		resources: [pmsBucket.bucketArn + "/*"],
+		principals: [new iam.AnyPrincipal()],
+	});
+
+	// Attach the policy to the bucket
+	pmsBucket.cdk.bucket.addToResourcePolicy(getObjectPolicy);
 
 	const processLambda = new Function(stack, "WorkflowProcessLambda", {
 		handler:
@@ -274,15 +300,6 @@ export function API({ stack }: StackContext) {
 		time: sfn.WaitTime.duration(Duration.seconds(1)),
 	});
 
-	// Define state machine
-	const stateMachine1 = new sfn.StateMachine(stack, "StateMachine", {
-		definition: sWait,
-	});
-
-	// const stepFunctionEnv = {
-	// 	STEP_FUNCTION_NAME: stateMachine.stateMachineName,
-	// 	STEP_FUNCTION_ARN: stateMachine.stateMachineArn,
-	// };
 	const api = new Api(stack, "api", {
 		defaults: {
 			function: {
@@ -290,8 +307,9 @@ export function API({ stack }: StackContext) {
 			},
 		},
 		routes: {
-			"POST /project":
-				"packages/functions/api/project/project-post.handler",
+			"POST /project": "packages/functions/api/project/project.post",
+			"GET /project/{id}/team":
+				"packages/functions/api/project/project.getProjectTeam",
 			"GET /project/{id}":
 				"packages/functions/api/project/project-getById.handler",
 			"GET /project":
@@ -318,10 +336,6 @@ export function API({ stack }: StackContext) {
 						{
 							name: stateMachine.stateMachineName,
 							arn: stateMachine.stateMachineArn,
-						},
-						{
-							name: stateMachine1.stateMachineName,
-							arn: stateMachine1.stateMachineArn,
 						},
 					]),
 				},

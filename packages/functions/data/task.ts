@@ -70,7 +70,7 @@ export const Tasks = new Entity(
 			status: {
 				type: "string",
 				required: true,
-				enum: ["inprogress", "completed"],
+				enum: ["inprogress", "completed", "pending"],
 				default: "inprogress",
 			},
 		},
@@ -118,6 +118,17 @@ export const Tasks = new Entity(
 					composite: ["taskId"],
 				},
 			},
+			// tasksByStatus: {
+			// 	index: 'gsi4',
+			// 	pk: {
+			// 	  field: 'gsi1pk',
+			// 	  composite: ['status']
+			// 	},
+			// 	sk: {
+			// 	  field: 'gsi4sk',
+			// 	  composite: ['taskId']
+			// 	}
+			//   },
 		},
 	},
 	{
@@ -132,6 +143,7 @@ export const addTask = async (task: any) => {
 		const result = await Tasks.create({
 			...task,
 		}).go();
+		console.log(result.data);
 		return result.data;
 	} catch (err) {
 		console.log(err.message);
@@ -156,25 +168,19 @@ export const updateTaskAssignee = async (
 
 //write func to get all templates from the db without any filters
 export const getTasks = async () => {
-	try {
-		const allItems = await Tasks.find({}).go();
-		return allItems.data;
-	} catch (err) {
-		console.log(err.message);
-	}
+	const allItems = await Tasks.find({}).go();
+	console.log(JSON.stringify(allItems));
+	return allItems.data;
 };
 
 export const getTasksByUsecaseId = async (usecaseId: string) => {
-	try {
-		const allItems = await Tasks.query
-			.byUsecase({
-				usecaseId: usecaseId,
-			})
-			.go();
-		return allItems.data;
-	} catch (err) {
-		console.log(err.message);
-	}
+	const allItems = await Tasks.query
+		.byUsecase({
+			usecaseId: usecaseId,
+		})
+		.go();
+	console.log(JSON.stringify(allItems));
+	return allItems.data;
 };
 
 export const getTask = async (taskId: string) => {
@@ -197,4 +203,11 @@ export const updateTaskStatus = async (taskId: string, status: string) => {
 	} catch (err) {
 		console.log(err.message);
 	}
+};
+
+export const getTasksByStatus = async (status: string = "pending") => {
+	const res = await Tasks.get({
+		status: status,
+	}).go();
+	return res.data;
 };

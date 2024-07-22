@@ -2,8 +2,8 @@ import { Entity } from "electrodb";
 import crypto from "crypto";
 import { Table } from "sst/node/table";
 import { client } from "./dynamo";
+import { UserUpdateRequest, UserResponse, UserRequest } from "../types/user";
 
-// Users Entity
 export const Users = new Entity(
 	{
 		model: {
@@ -21,6 +21,9 @@ export const Users = new Entity(
 			name: {
 				type: "string",
 				required: true,
+			},
+			teamId: {
+				type: "string",
 			},
 			role: {
 				type: "string",
@@ -44,8 +47,11 @@ export const Users = new Entity(
 				pk: {
 					field: "pk",
 					composite: ["userId"],
-				},			},
-			
+				},
+				sk: {
+					field: "sk",
+					composite: [],
+				},
 			},
 			usersByRole: {
 				index: "gsi1",
@@ -65,3 +71,47 @@ export const Users = new Entity(
 		client,
 	}
 );
+
+export const addUser = async (users: UserRequest) => {
+	const res = await Users.create({
+		name: users.name,
+		role: users.role,
+	}).go();
+	return res.data;
+};
+
+export const updateUser = async (
+	userId: string,
+	userUpdate: UserUpdateRequest
+) => {
+	const res = await Users.update({
+		userId: userId,
+	})
+		.set(userUpdate)
+		.go();
+	return res.data;
+};
+
+export const getUser = async (userId: string) => {
+	const res = await Users.get({ userId }).go();
+	return res.data;
+};
+
+export const getUsers = async () => {
+	const allItems = await Users.find({}).go();
+	return allItems.data;
+};
+
+// export const getUserByProject = async (projectId: string) => {
+// 	const res = await Users.get({
+// 		projectId: projectId,
+// 	}).go();
+// 	return res.data;
+// };
+
+export const deleteUser = async (userId: string) => {
+	const res = await Users.delete({
+		userId: userId,
+	}).go();
+	return res.data;
+};
